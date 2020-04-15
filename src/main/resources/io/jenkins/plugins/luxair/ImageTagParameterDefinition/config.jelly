@@ -14,6 +14,14 @@
 		<f:textbox default=".*" />
 	</f:entry>
 
+    <f:entry title="${%Default Value}" field="defaultValue">
+		<f:textbox default="" />
+	</f:entry>
+
+	<f:entry title="${%Return Only Tags}" field="returnOnlyTags">
+        <f:checkbox/>
+	</f:entry>
+
     <f:entry title="${%Regitry URL}" field="registry">
 		<f:textbox default="${descriptor.defaultRegistry()}"/>
 	</f:entry>

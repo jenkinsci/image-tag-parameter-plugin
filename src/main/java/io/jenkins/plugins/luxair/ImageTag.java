@@ -20,14 +20,19 @@ public class ImageTag {
     private static final Logger logger = Logger.getLogger(ImageTag.class.getName());
     private static final Interceptor errorInterceptor = new ErrorInterceptor();
 
-    public static List<String> getTags(String image, String registry, String filter, String user, String password) {
+    public static List<String> getTags(String image, String registry, String filter, boolean returnOnlyTags, String user, String password) {
 
         String[] authService = getAuthService(registry);
         String token = getAuthToken(authService, image, user, password);
         List<String> tags = getImageTagsFromRegistry(image, registry, token);
-        return tags.stream().filter(tag -> tag.matches(filter))
-            .map(tag -> image + ":" + tag)
-            .collect(Collectors.toList());
+        if (returnOnlyTags){
+            return tags.stream().filter(tag -> tag.matches(filter))
+                .collect(Collectors.toList());
+        } else {
+            return tags.stream().filter(tag -> tag.matches(filter))
+                .map(tag -> image + ":" + tag)
+                .collect(Collectors.toList());
+        }
     }
 
     private static String[] getAuthService(String registry) {
@@ -70,7 +75,7 @@ public class ImageTag {
         } else {
             logger.info("No basic authentication");
         }
-        HttpResponse<JsonNode> response = request 
+        HttpResponse<JsonNode> response = request
             .queryString("service", service)
             .queryString("scope", "repository:" + image + ":pull")
             .asJson();

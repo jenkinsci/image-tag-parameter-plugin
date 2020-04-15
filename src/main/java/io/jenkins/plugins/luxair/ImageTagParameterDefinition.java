@@ -34,14 +34,18 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     private final String registry;
     private final String filter;
     private final String credentialId;
+    private final String defaultValue;
+    private final Boolean returnOnlyTags;
 
     @DataBoundConstructor
-    public ImageTagParameterDefinition(String name, String description, String image, String registry, String filter, String credentialId) {
+    public ImageTagParameterDefinition(String name, String description, String image, String registry, String defaultValue, String filter, String credentialId, boolean returnOnlyTags) {
         super(name, description);
         this.image = image;
         this.registry = StringUtil.isNotNullOrEmpty(registry) ? registry : config.getDefaultRegistry();
         this.filter = StringUtil.isNotNullOrEmpty(filter) ? filter : ".*";
         this.credentialId = StringUtil.isNotNullOrEmpty(credentialId) ? credentialId : "";
+        this.defaultValue = defaultValue;
+        this.returnOnlyTags = returnOnlyTags;
     }
 
     public String getImage() {
@@ -54,6 +58,10 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
 
     public String getFilter() {
         return filter;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
     }
 
     public String getCredentialId() {
@@ -73,6 +81,9 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         imageTags = ImageTag.getTags(image, registry, filter, user, password);
         return imageTags;
     }
+
+    public Boolean getReturnOnlyTags() {
+        return returnOnlyTags;
 
     private StandardUsernamePasswordCredentials findCredential(String credentialId) {
         if (StringUtil.isNotNullOrEmpty(credentialId)) {
@@ -107,7 +118,6 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     public ParameterValue createValue(StaplerRequest req, JSONObject jo) {
         return req.bindJSON(StringParameterValue.class, jo);
     }
-
     @Symbol("imageTag")
     @Extension
     public static class DescriptorImpl extends ParameterDescriptor {
@@ -115,7 +125,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         @Override
         public String getDisplayName() {
             return "Image Tag Parameter";
-        }        
+        }
 
         public String defaultRegistry() {
             return config.getDefaultRegistry();
