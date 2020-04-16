@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -108,6 +109,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         return req.bindJSON(StringParameterValue.class, jo);
     }
 
+    @Symbol("imageTag")
     @Extension
     public static class DescriptorImpl extends ParameterDescriptor {
 
