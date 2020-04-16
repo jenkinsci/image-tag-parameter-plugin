@@ -14,6 +14,25 @@ It use the Docker **Registry HTTP API V2** to list tags availaible for an image.
 
 ![Image Selection](img/screen03.png)
 
+## Use in Declarative Pipeline
+```groovy
+pipeline {
+  agent any
+
+  parameters {
+    imageTag credentialId: '', description: '', filter: 'lts.*', image: 'jenkins/jenkins', name: 'DOCKER_IMAGE', registry: 'https://registry-1.docker.io'
+  }
+
+  stages {
+    stage('Test') {
+      steps {
+        echo "$DOCKER_IMAGE"
+      }
+    }
+  }
+}
+```
+
 ## how to build the Jenkins Plugin
  
 ### Install skdman
