@@ -1,18 +1,14 @@
 package io.jenkins.plugins.luxair;
 
+import kong.unirest.*;
+import kong.unirest.json.JSONObject;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import kong.unirest.GetRequest;
-import kong.unirest.HttpResponse;
-import kong.unirest.Interceptor;
-import kong.unirest.JsonNode;
-import kong.unirest.Unirest;
-import kong.unirest.json.JSONObject;
 
 
 public class ImageTag {
@@ -25,8 +21,9 @@ public class ImageTag {
         String[] authService = getAuthService(registry);
         String token = getAuthToken(authService, image, user, password);
         List<String> tags = getImageTagsFromRegistry(image, registry, token);
-        return tags.stream().filter(tag -> tag.matches(filter))
+        return tags.parallelStream().filter(tag -> tag.matches(filter))
             .map(tag -> image + ":" + tag)
+            .sorted()
             .collect(Collectors.toList());
     }
 
@@ -104,16 +101,15 @@ public class ImageTag {
             .asJson();
         if (response.isSuccess()) {
             logger.info("HTTP status: " + response.getStatusText());
-            response.getBody().getObject().getJSONArray("tags").forEach(item -> {
-                tags.add(item.toString());
-            });
+            response.getBody().getObject()
+                .getJSONArray("tags")
+                .forEach(item -> tags.add(item.toString()));
         } else {
             logger.warning("HTTP status: " + response.getStatusText());
             tags.add(" " + response.getStatusText() + " !");
         }
         Unirest.shutDown();
 
-        Collections.sort(tags, Collections.reverseOrder());
         return tags;
     }
 }
