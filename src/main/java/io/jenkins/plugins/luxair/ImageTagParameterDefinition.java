@@ -35,7 +35,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     private final String filter;
     private final String credentialId;
     private final String defaultValue;
-    private final Boolean returnOnlyTags;
+    private final boolean returnOnlyTags;
 
     @DataBoundConstructor
     public ImageTagParameterDefinition(String name, String description, String image, String registry, String defaultValue, String filter, String credentialId, boolean returnOnlyTags) {
@@ -44,7 +44,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         this.registry = StringUtil.isNotNullOrEmpty(registry) ? registry : config.getDefaultRegistry();
         this.filter = StringUtil.isNotNullOrEmpty(filter) ? filter : ".*";
         this.credentialId = StringUtil.isNotNullOrEmpty(credentialId) ? credentialId : "";
-        this.defaultValue = defaultValue;
+        this.defaultValue = StringUtil.isNotNullOrEmpty(defaultValue) ? defaultValue : "";
         this.returnOnlyTags = returnOnlyTags;
     }
 
@@ -78,12 +78,13 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
             user = credential.getUsername();
             password = credential.getPassword().getPlainText();
         }
-        imageTags = ImageTag.getTags(image, registry, filter, user, password);
+        imageTags = ImageTag.getTags(image, registry, filter, returnOnlyTags, user, password);
         return imageTags;
     }
 
     public Boolean getReturnOnlyTags() {
         return returnOnlyTags;
+    }
 
     private StandardUsernamePasswordCredentials findCredential(String credentialId) {
         if (StringUtil.isNotNullOrEmpty(credentialId)) {
