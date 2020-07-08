@@ -116,7 +116,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
             }
             logger.warning("Cannot find credential for :" + credentialId + ":");
         } else {
-            logger.info("CredentialId is empty");
+            logger.fine("CredentialId is empty");
         }
         return null;
     }
@@ -167,7 +167,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
                                                     @QueryParameter String credentialId) {
             if (context == null && !Jenkins.get().hasPermission(Jenkins.ADMINISTER) ||
                 context != null && !context.hasPermission(Item.EXTENDED_READ)) {
-                logger.info("No permission to list credential");
+                logger.info("No permission to list credential in context: " + context);
                 return new StandardListBoxModel().includeCurrentValue(credentialId);
             }
             return new StandardListBoxModel()

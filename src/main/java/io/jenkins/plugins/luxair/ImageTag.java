@@ -61,7 +61,7 @@ public class ImageTag {
 
         if (type.equals(AuthType.BASIC.value)) {
             authService.setAuthType(AuthType.BASIC);
-            logger.info("AuthService: type=Basic");
+            logger.fine("AuthService: type=Basic");
         } else if (type.equals(AuthType.BEARER.value)) {
             String pattern = "Bearer realm=\"(\\S+)\",service=\"(\\S+)\"";
             Matcher m = Pattern.compile(pattern).matcher(headerValue);
@@ -69,7 +69,7 @@ public class ImageTag {
                 authService.setAuthType(AuthType.BEARER);
                 authService.setRealm(m.group(1));
                 authService.setService(m.group(2));
-                logger.info("AuthService: type=Bearer, realm=" + m.group(1) + ", service=" + m.group(2));
+                logger.fine("AuthService: type=Bearer, realm=" + m.group(1) + ", service=" + m.group(2));
             } else {
                 logger.warning("No AuthService available from " + url);
             }
@@ -104,7 +104,7 @@ public class ImageTag {
         Unirest.config().enableCookieManagement(false).interceptor(errorInterceptor);
         GetRequest request = Unirest.get(authService.getRealm());
         if (!user.isEmpty() && !password.isEmpty()) {
-            logger.info("Using Basic authentication to fetch AuthToken");
+            logger.fine("Using Basic authentication to fetch AuthToken");
             request = request.basicAuth(user, password);
         }
         HttpResponse<JsonNode> response = request
@@ -126,7 +126,7 @@ public class ImageTag {
 
         for (String key : searchKey) {
             if (jsonObj.has(key)) {
-                logger.info("Token received");
+                logger.fine("Token received");
                 return jsonObj.getString(key);
             }
         }
@@ -147,7 +147,7 @@ public class ImageTag {
             .routeParam("image", image)
             .asJson();
         if (response.isSuccess()) {
-            logger.info("HTTP status: " + response.getStatusText());
+            logger.fine("HTTP status: " + response.getStatusText());
             response.getBody().getObject()
                 .getJSONArray("tags")
                 .forEach(item -> tags.add(new VersionNumber(item.toString())));
