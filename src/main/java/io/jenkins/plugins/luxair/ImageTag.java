@@ -1,12 +1,15 @@
 package io.jenkins.plugins.luxair;
 
 import hudson.util.VersionNumber;
+import io.jenkins.plugins.luxair.util.AuthService;
+import io.jenkins.plugins.luxair.util.AuthType;
 import kong.unirest.*;
 import kong.unirest.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -25,21 +28,21 @@ public class ImageTag {
 
     public static List<String> getTags(String image, String registry, String filter,
                                        String user, String password, boolean reverseOrdering) {
-        String[] authService = getAuthService(registry);
-        String token = getAuthToken(authService, image, user, password);
-        List<VersionNumber> tags = getImageTagsFromRegistry(image, registry, authService, token);
-        return tags.stream().filter(tag -> tag.toString().matches(filter))
-            .sorted(!reverseOrdering ? VersionNumber.DESCENDING : VersionNumber::compareTo)
-            .map(VersionNumber::toString)
-            .collect(Collectors.toList());
+        AuthService authService = getAuthService(registry);
+        if (authService.getAuthType() != AuthType.UNKNOWN) {
+            String token = getAuthToken(authService, image, user, password);
+            List<VersionNumber> tags = getImageTagsFromRegistry(image, registry, authService.getAuthType(), token);
+            return tags.stream().filter(tag -> tag.toString().matches(filter))
+                .sorted(!reverseOrdering ? VersionNumber.DESCENDING : VersionNumber::compareTo)
+                .map(VersionNumber::toString)
+                .collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
-    private static String[] getAuthService(String registry) {
-
-        String[] rtn = new String[3];
-        rtn[0] = ""; // type
-        rtn[1] = ""; // realm
-        rtn[2] = ""; // service
+    private static AuthService getAuthService(String registry) {
+        AuthService authService = new AuthService(AuthType.UNKNOWN);
         String url = registry + "/v2/";
 
         Unirest.config().reset();
@@ -56,88 +59,91 @@ public class ImageTag {
             type = typeMatcher.group(1);
         }
 
-        if (type.equals("Basic")) {
-            rtn[0] = "Basic";
+        if (type.equals(AuthType.BASIC.value)) {
+            authService.setAuthType(AuthType.BASIC);
             logger.info("AuthService: type=Basic");
-
-            return rtn;
-        }
-
-        if (type.equals("Bearer")) {
+        } else if (type.equals(AuthType.BEARER.value)) {
             String pattern = "Bearer realm=\"(\\S+)\",service=\"(\\S+)\"";
             Matcher m = Pattern.compile(pattern).matcher(headerValue);
             if (m.find()) {
-                rtn[0] = "Bearer";
-                rtn[1] = m.group(1);
-                rtn[2] = m.group(2);
-                logger.info("AuthService: type=Bearer, realm=" + rtn[0] + ", service=" + rtn[1]);
+                authService.setAuthType(AuthType.BEARER);
+                authService.setRealm(m.group(1));
+                authService.setService(m.group(2));
+                logger.info("AuthService: type=Bearer, realm=" + m.group(1) + ", service=" + m.group(2));
             } else {
                 logger.warning("No AuthService available from " + url);
             }
-
-            return rtn;
+        } else {
+            logger.warning("Unknown authorization type! Received type: " + type);
         }
 
-        // Ops!
-        logger.warning("Unknown authorization type " + type);
-
-        return rtn;
+        return authService;
     }
 
-    private static String getAuthToken(String[] authService, String image, String user, String password) {
-
-        String type = authService[0];
+    private static String getAuthToken(AuthService authService, String image, String user, String password) {
         String token = "";
 
-        if (type.equals("Basic")) {
-            token = Base64.getEncoder().encodeToString((user + ":" + password).getBytes(StandardCharsets.UTF_8));
-
-            return token;
+        switch (authService.getAuthType()) {
+            case BASIC:
+                token = Base64.getEncoder().encodeToString((user + ":" + password).getBytes(StandardCharsets.UTF_8));
+                break;
+            case BEARER:
+                token = getBearerAuthToken(authService, image, user, password);
+                break;
+            default:
+                logger.warning("AuthServiceType is unknown. Unable to fetch AuthToken.");
         }
 
-        String realm = authService[1];
-        String service = authService[2];
+        return token;
+    }
+
+    private static String getBearerAuthToken(AuthService authService, String image, String user, String password) {
+        String token = "";
 
         Unirest.config().reset();
         Unirest.config().enableCookieManagement(false).interceptor(errorInterceptor);
-        GetRequest request = Unirest.get(realm);
+        GetRequest request = Unirest.get(authService.getRealm());
         if (!user.isEmpty() && !password.isEmpty()) {
-            logger.info("Basic authentication");
+            logger.info("Using Basic authentication to fetch AuthToken");
             request = request.basicAuth(user, password);
-        } else {
-            logger.info("No basic authentication");
         }
         HttpResponse<JsonNode> response = request
-            .queryString("service", service)
+            .queryString("service", authService.getService())
             .queryString("scope", "repository:" + image + ":pull")
             .asJson();
         if (response.isSuccess()) {
-            JSONObject jsonObject = response.getBody().getObject();
-            if (jsonObject.has("token")) {
-                token = jsonObject.getString("token");
-            } else if (jsonObject.has("access_token")) {
-                token = jsonObject.getString("access_token");
-            } else {
-                logger.warning("Token not received");
-            }
-            logger.info("Token received");
+            token = findTokenInResponse(response, "token", "access_token");
         } else {
-            logger.warning("Token not received");
+            logger.warning("Request failed! Token was not received");
         }
         Unirest.shutDown();
 
         return token;
     }
 
+    private static String findTokenInResponse(HttpResponse<JsonNode> response, String... searchKey) {
+        JSONObject jsonObj = response.getBody().getObject();
+
+        for (String key : searchKey) {
+            if (jsonObj.has(key)) {
+                logger.info("Token received");
+                return jsonObj.getString(key);
+            }
+        }
+
+        logger.warning("Unable to find token in response! Token was not received");
+        return "";
+    }
+
     private static List<VersionNumber> getImageTagsFromRegistry(String image, String registry,
-                                                                String[] authService, String token) {
+                                                                AuthType authType, String token) {
         List<VersionNumber> tags = new ArrayList<>();
         String url = registry + "/v2/{image}/tags/list";
 
         Unirest.config().reset();
         Unirest.config().enableCookieManagement(false).interceptor(errorInterceptor);
         HttpResponse<JsonNode> response = Unirest.get(url)
-            .header("Authorization", authService[0] + " " + token)
+            .header("Authorization", authType + " " + token)
             .routeParam("image", image)
             .asJson();
         if (response.isSuccess()) {
@@ -146,7 +152,7 @@ public class ImageTag {
                 .getJSONArray("tags")
                 .forEach(item -> tags.add(new VersionNumber(item.toString())));
         } else {
-            logger.warning("HTTP status: " + response.getStatusText());
+            logger.warning("Image tags request responded with HTTP status: " + response.getStatusText());
         }
         Unirest.shutDown();
 
