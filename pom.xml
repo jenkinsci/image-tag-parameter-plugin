@@ -1,26 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.50</version>
-        <relativePath />
+        <version>4.9</version>
+        <relativePath/>
     </parent>
-    <artifactId>image-tag-parameter</artifactId>
-    <version>1.10-SNAPSHOT</version>
-    <packaging>hpi</packaging>
+
     <properties>
-        <jenkins.version>2.164.3</jenkins.version>
+        <revision>1.10</revision>
+        <changelist>-SNAPSHOT</changelist>
+        <jenkins.version>2.235.5</jenkins.version>
+        <bom.artifactId>2.235.x</bom.artifactId>
+        <bom.version>12</bom.version>
         <java.level>8</java.level>
     </properties>
+
     <name>Image Tag Parameter Plugin</name>
+    <artifactId>image-tag-parameter</artifactId>
+    <version>${revision}${changelist}</version>
+    <packaging>hpi</packaging>
+
     <licenses>
         <license>
             <name>MIT License</name>
             <url>https://opensource.org/licenses/MIT</url>
         </license>
     </licenses>
+
     <developers>
         <developer>
             <id>maduma</id>
@@ -28,6 +38,12 @@
             <email>maduma@pt.lu</email>
         </developer>
     </developers>
+
+    <issueManagement>
+        <system>Jira</system>
+        <url>https://issues.jenkins-ci.org</url>
+    </issueManagement>
+
     <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
     <scm>
         <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
@@ -35,6 +51,31 @@
         <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
         <tag>HEAD</tag>
     </scm>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jenkins.tools.bom</groupId>
+                <artifactId>bom-${bom.artifactId}</artifactId>
+                <version>${bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>credentials</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java</artifactId>
+            <version>3.11.00</version>
+        </dependency>
+    </dependencies>
+
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
@@ -47,16 +88,4 @@
             <url>https://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
-    <dependencies>
-        <dependency>
-            <groupId>com.konghq</groupId>
-            <artifactId>unirest-java</artifactId>
-            <version>3.3.00</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>credentials</artifactId>
-            <version>2.3.0</version>
-        </dependency>
-    </dependencies>
 </project>
