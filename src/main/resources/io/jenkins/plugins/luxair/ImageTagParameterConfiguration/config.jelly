@@ -13,5 +13,9 @@
         <f:entry title="${%Default Tag Ordering}" field="defaultTagOrdering">
             <f:enum>${it}</f:enum>
         </f:entry>
+
+        <f:entry title="${%Default Verify SSL}" field="defaultVerifySsl">
+            <f:checkbox>${it}</f:checkbox>
+        </f:entry>
     </f:section>
 </j:jelly>

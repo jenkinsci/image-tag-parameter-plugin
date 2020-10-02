@@ -27,6 +27,10 @@
             <f:textbox default="${descriptor.getDefaultRegistry()}" />
         </f:entry>
 
+        <f:entry title="${%Verify SSL}" field="verifySsl">
+            <f:checkbox default="${descriptor.getDefaultVerifySsl()}" />
+        </f:entry>
+
         <f:entry title="${%Registry Credential ID}" field="credentialId">
             <c:select default="${descriptor.getDefaultCredentialID()}" />
         </f:entry>

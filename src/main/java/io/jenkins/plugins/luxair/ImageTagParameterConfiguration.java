@@ -29,6 +29,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
     private String defaultRegistry = DEFAULT_REGISTRY;
     private String defaultCredentialId = "";
     private Ordering defaultTagOrdering = Ordering.NATURAL;
+    private Boolean defaultVerifySsl = true;
 
     public ImageTagParameterConfiguration() {
         load();
@@ -46,6 +47,8 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
         return defaultTagOrdering != null ? defaultTagOrdering : Ordering.NATURAL;
     }
 
+    public Boolean getDefaultVerifySsl() { return defaultVerifySsl; }
+
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) {
         if (json.has("defaultRegistry")) {
@@ -59,6 +62,10 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
         if (json.has("defaultTagOrdering")) {
             this.defaultTagOrdering = Ordering.valueOf(json.getString("defaultTagOrdering"));
             logger.fine("Changed default tag ordering to: " + defaultTagOrdering);
+        }
+        if (json.has("defaultVerifySsl")) {
+            this.defaultVerifySsl = json.getBoolean("defaultVerifySsl");
+            logger.fine("Changed default verify SSL to: " + defaultVerifySsl);
         }
         save();
         return true;
@@ -85,6 +92,14 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
     public void setDefaultTagOrdering(Ordering defaultTagOrdering) {
         logger.info("Changing default tag ordering to: " + defaultTagOrdering);
         this.defaultTagOrdering = defaultTagOrdering;
+        save();
+    }
+
+    @DataBoundSetter
+    @SuppressWarnings("unused")
+    public void setDefaultVerifySsl(Boolean defaultVerifySsl) {
+        logger.info("Changing default verify SSL to: " + defaultVerifySsl);
+        this.defaultVerifySsl = defaultVerifySsl;
         save();
     }
 

@@ -27,12 +27,12 @@ public class ImageTag {
     }
 
     public static ResultContainer<List<String>> getTags(String image, String registry, String filter,
-                                                        String user, String password, Ordering ordering) {
+                                                        String user, String password, Ordering ordering, Boolean verifySsl) {
         ResultContainer<List<String>> container = new ResultContainer<>(Collections.emptyList());
 
-        String[] authService = getAuthService(registry);
-        String token = getAuthToken(authService, image, user, password);
-        ResultContainer<List<VersionNumber>> tags = getImageTagsFromRegistry(image, registry, authService[0], token);
+        String[] authService = getAuthService(registry, verifySsl);
+        String token = getAuthToken(authService, image, user, password, verifySsl);
+        ResultContainer<List<VersionNumber>> tags = getImageTagsFromRegistry(image, registry, authService[0], token, verifySsl);
 
         if (tags.getErrorMsg().isPresent()) {
             container.setErrorMsg(tags.getErrorMsg().get());
@@ -71,7 +71,7 @@ public class ImageTag {
         return container;
     }
 
-    private static String[] getAuthService(String registry) {
+    private static String[] getAuthService(String registry, Boolean verifySsl) {
 
         String[] rtn = new String[3];
         rtn[0] = ""; // type
@@ -81,6 +81,7 @@ public class ImageTag {
 
         Unirest.config().reset();
         Unirest.config().enableCookieManagement(false).interceptor(errorInterceptor);
+        Unirest.config().verifySsl(verifySsl);
         String headerValue = Unirest.get(url).asEmpty()
             .getHeaders().getFirst("Www-Authenticate");
         Unirest.shutDown();
@@ -121,7 +122,7 @@ public class ImageTag {
         return rtn;
     }
 
-    private static String getAuthToken(String[] authService, String image, String user, String password) {
+    private static String getAuthToken(String[] authService, String image, String user, String password, Boolean verifySsl) {
 
         String type = authService[0];
         String token = "";
@@ -137,6 +138,7 @@ public class ImageTag {
 
         Unirest.config().reset();
         Unirest.config().enableCookieManagement(false).interceptor(errorInterceptor);
+        Unirest.config().verifySsl(verifySsl);
         GetRequest request = Unirest.get(realm);
         if (!user.isEmpty() && !password.isEmpty()) {
             logger.info("Basic authentication");
@@ -167,12 +169,13 @@ public class ImageTag {
     }
 
     private static ResultContainer<List<VersionNumber>> getImageTagsFromRegistry(String image, String registry,
-                                                                                 String authType, String token) {
+                                                                                 String authType, String token, Boolean verifySsl) {
         ResultContainer<List<VersionNumber>> resultContainer = new ResultContainer<>(new ArrayList<>());
         String url = registry + "/v2/" + image + "/tags/list";
 
         Unirest.config().reset();
         Unirest.config().enableCookieManagement(false).interceptor(errorInterceptor);
+        Unirest.config().verifySsl(verifySsl);
         HttpResponse<JsonNode> response = Unirest.get(url)
             .header("Authorization", authType + " " + token)
             .asJson();
