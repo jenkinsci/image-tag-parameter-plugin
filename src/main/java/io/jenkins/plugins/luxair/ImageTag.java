@@ -47,7 +47,7 @@ public class ImageTag {
 
     private static ResultContainer<List<String>> filterTags(List<VersionNumber> tags, String filter, Ordering ordering) {
         ResultContainer<List<String>> container = new ResultContainer<>(Collections.emptyList());
-        logger.info("Ordering Tags according to: " + ordering);
+        logger.fine(Messages.ITP_ImageTagService_Log_fine_OrderingTo(ordering));
 
         if (ordering == Ordering.NATURAL || ordering == Ordering.REV_NATURAL) {
             container.setValue(tags.stream()
@@ -63,8 +63,8 @@ public class ImageTag {
                     .map(VersionNumber::toString)
                     .collect(Collectors.toList()));
             } catch (Exception ignore) {
-                logger.warning("Unable to cast ImageTags to versions! Versioned Ordering is not supported for this images tags.");
-                container.setErrorMsg("Unable to cast ImageTags to versions! Versioned Ordering is not supported for this images tags.");
+                logger.warning(Messages.ITP_ImageTagService_Log_warn_UnableToVersionCast());
+                container.setErrorMsg(Messages.ITP_ImageTagService_Log_warn_UnableToVersionCast());
             }
         }
 
@@ -95,7 +95,7 @@ public class ImageTag {
 
         if (type.equalsIgnoreCase("Basic")) {
             rtn[0] = "Basic";
-            logger.info("AuthService: type=Basic");
+            logger.fine(Messages.ITP_ImageTagService_Log_fine_AuthServiceBasic());
 
             return rtn;
         }
@@ -107,16 +107,16 @@ public class ImageTag {
                 rtn[0] = "Bearer";
                 rtn[1] = m.group(1);
                 rtn[2] = m.group(2);
-                logger.info("AuthService: type=Bearer, realm=" + rtn[0] + ", service=" + rtn[1]);
+                logger.fine(Messages.ITP_ImageTagService_Log_fine_AuthServiceBearer(rtn[1], rtn[2]));
             } else {
-                logger.warning("No AuthService available from " + url);
+                logger.warning(Messages.ITP_ImageTagService_Log_warn_AuthServiceNotAvailable(url));
             }
 
             return rtn;
         }
 
         // Ops!
-        logger.warning("Unknown authorization type " + type);
+        logger.warning(Messages.ITP_ImageTagService_Log_warn_UnknownAuth(type));
 
         return rtn;
     }
@@ -139,10 +139,10 @@ public class ImageTag {
         Unirest.config().enableCookieManagement(false).interceptor(errorInterceptor);
         GetRequest request = Unirest.get(realm);
         if (!user.isEmpty() && !password.isEmpty()) {
-            logger.info("Basic authentication");
+            logger.fine(Messages.ITP_ImageTagService_Log_fine_UseBasicAuth());
             request = request.basicAuth(user, password);
         } else {
-            logger.info("No basic authentication");
+            logger.fine(Messages.ITP_ImageTagService_Log_fine_NoBasicAuth());
         }
         HttpResponse<JsonNode> response = request
             .queryString("service", service)
@@ -155,11 +155,11 @@ public class ImageTag {
             } else if (jsonObject.has("access_token")) {
                 token = jsonObject.getString("access_token");
             } else {
-                logger.warning("Token not received");
+                logger.warning(Messages.ITP_ImageTagService_Log_warn_NoTokenReceived());
             }
-            logger.info("Token received");
+            logger.fine(Messages.ITP_ImageTagService_Log_fine_TokenReceived());
         } else {
-            logger.warning("Token not received");
+            logger.warning(Messages.ITP_ImageTagService_Log_warn_NoTokenReceived());
         }
         Unirest.shutDown();
 
@@ -177,13 +177,13 @@ public class ImageTag {
             .header("Authorization", authType + " " + token)
             .asJson();
         if (response.isSuccess()) {
-            logger.info("HTTP status: " + response.getStatusText());
+            logger.fine(Messages.ITP_ImageTagService_Log_fine_RequestSuccess(response.getStatus(), response.getStatusText()));
             response.getBody().getObject()
                 .getJSONArray("tags")
                 .forEach(item -> resultContainer.getValue().add(new VersionNumber(item.toString())));
         } else {
-            logger.warning("HTTP status: " + response.getStatusText());
-            resultContainer.setErrorMsg("HTTP status: " + response.getStatusText());
+            logger.warning(Messages.ITP_ImageTagService_Log_warn_RequestError(response.getStatus(), response.getStatusText()));
+            resultContainer.setErrorMsg(Messages.ITP_ImageTagService_Log_warn_RequestError(response.getStatus(), response.getStatusText()));
         }
         Unirest.shutDown();
 
