@@ -1,18 +1,17 @@
 package io.jenkins.plugins.luxair;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import hudson.Extension;
 import hudson.model.Item;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.SimpleParameterDefinition;
-import hudson.security.ACL;
+import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import io.jenkins.plugins.luxair.model.Ordering;
 import io.jenkins.plugins.luxair.model.ResultContainer;
+import io.jenkins.plugins.luxair.util.CredentialsUtils;
 import io.jenkins.plugins.luxair.util.StringUtil;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -20,16 +19,13 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.*;
 
 import javax.annotation.Nonnull;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 
 public class ImageTagParameterDefinition extends SimpleParameterDefinition {
 
     private static final long serialVersionUID = 3938123092372L;
-    private static final Logger logger = Logger.getLogger(ImageTagParameterDefinition.class.getName());
     private static final ImageTagParameterConfiguration config = ImageTagParameterConfiguration.get();
 
     private final String image;
@@ -116,10 +112,10 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         String user = "";
         String password = "";
 
-        StandardUsernamePasswordCredentials credential = findCredential(credentialId);
-        if (credential != null) {
-            user = credential.getUsername();
-            password = credential.getPassword().getPlainText();
+        Optional<StandardUsernamePasswordCredentials> credential = CredentialsUtils.findCredentials(credentialId);
+        if (credential.isPresent()) {
+            user = credential.get().getUsername();
+            password = credential.get().getPassword().getPlainText();
         }
 
         ResultContainer<List<String>> resultContainer = ImageTag.getTags(image, registry, filter, user, password, tagOrder);
@@ -131,28 +127,6 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         }
 
         return resultContainer.getValue();
-    }
-
-    private StandardUsernamePasswordCredentials findCredential(String credentialId) {
-        if (StringUtil.isNotNullOrEmpty(credentialId)) {
-            List<Item> items = Jenkins.get().getAllItems();
-            for (Item item : items) {
-                List<StandardUsernamePasswordCredentials> creds = CredentialsProvider.lookupCredentials(
-                    StandardUsernamePasswordCredentials.class,
-                    item,
-                    ACL.SYSTEM,
-                    Collections.emptyList());
-                for (StandardUsernamePasswordCredentials cred : creds) {
-                    if (cred.getId().equals(credentialId)) {
-                        return cred;
-                    }
-                }
-            }
-            logger.warning("Cannot find credential for :" + credentialId + ":");
-        } else {
-            logger.info("CredentialId is empty");
-        }
-        return null;
     }
 
     @Override
@@ -183,7 +157,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         @Override
         @Nonnull
         public String getDisplayName() {
-            return "Image Tag Parameter";
+            return Messages.ITP_DescriptorImpl_DisplayName();
         }
 
         @SuppressWarnings("unused")
@@ -204,15 +178,22 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         @SuppressWarnings("unused")
         public ListBoxModel doFillCredentialIdItems(@AncestorInPath Item context,
                                                     @QueryParameter String credentialId) {
-            if (context == null && !Jenkins.get().hasPermission(Jenkins.ADMINISTER) ||
-                context != null && !context.hasPermission(Item.EXTENDED_READ)) {
-                logger.info("No permission to list credential");
-                return new StandardListBoxModel().includeCurrentValue(credentialId);
+            return CredentialsUtils.doFillCredentialsIdItems(context, credentialId);
+        }
+
+        public FormValidation doCheckCredentialId(@QueryParameter final String value,
+                                                  @AncestorInPath final Item context) {
+            if (context == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                    return FormValidation.ok();
+                }
+            } else {
+                if (!context.hasPermission(Item.EXTENDED_READ) && !context.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return FormValidation.ok();
+                }
             }
-            return new StandardListBoxModel()
-                .includeEmptyValue()
-                .includeAs(ACL.SYSTEM, context, StandardUsernameCredentials.class)
-                .includeCurrentValue(credentialId);
+
+            return CredentialsUtils.doCheckCredentialsId(value);
         }
     }
 }
