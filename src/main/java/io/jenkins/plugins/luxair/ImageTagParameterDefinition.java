@@ -44,8 +44,8 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     @DataBoundConstructor
     @SuppressWarnings("unused")
     public ImageTagParameterDefinition(String name, String description, String image, String filter,
-                                       String registry, String credentialId, Boolean verifySsl) {
-        this(name, description, image, filter, "", registry, credentialId, config.getDefaultTagOrdering(), verifySsl);
+                                       String registry, String credentialId) {
+        this(name, description, image, filter, "", registry, credentialId, config.getDefaultTagOrdering(), config.getDefaultVerifySsl());
     }
 
     public ImageTagParameterDefinition(String name, String description, String image, String filter, String defaultTag,
