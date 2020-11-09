@@ -74,6 +74,7 @@ for (plugin in [
     "ldap",
     "email-ext",
     "configuration-as-code",
+    "aws-credentials",
     ]) {
 	e = Hudson.instance.updateCenter.getPlugin(plugin).deploy().get().getError()
 	if (e != null)

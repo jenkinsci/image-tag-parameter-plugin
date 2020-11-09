@@ -1,15 +1,19 @@
 package io.jenkins.plugins.luxair;
 
+import com.amazonaws.regions.Regions;
+import com.cloudbees.jenkins.plugins.awscredentials.AWSCredentialsHelper;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import hudson.Extension;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
 import io.jenkins.plugins.luxair.model.Ordering;
+import io.jenkins.plugins.luxair.model.Provider;
 import io.jenkins.plugins.luxair.util.StringUtil;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.graalvm.compiler.options.SuppressFBWarnings;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -29,6 +33,9 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
     private String defaultRegistry = DEFAULT_REGISTRY;
     private String defaultCredentialId = "";
     private Ordering defaultTagOrdering = Ordering.NATURAL;
+    private Provider defaultTagProvider = Provider.DOCKER_HUB;
+    private Regions defaultTagAWSRegion = Regions.US_EAST_1;
+    private String ecrImageName = "";
 
     public ImageTagParameterConfiguration() {
         load();
@@ -46,6 +53,18 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
         return defaultTagOrdering != null ? defaultTagOrdering : Ordering.NATURAL;
     }
 
+    public Provider getDefaultTagProvider() {
+        return defaultTagProvider != null ? defaultTagProvider : Provider.DOCKER_HUB;
+    }
+
+    public Regions getDefaultTagAWSRegion() {
+        return defaultTagAWSRegion != null ? defaultTagAWSRegion : Regions.US_EAST_1;
+    }
+
+    public String getEcrImageName() {
+        return ecrImageName != null ? ecrImageName : "";
+    }
+
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) {
         if (json.has("defaultRegistry")) {
@@ -59,6 +78,18 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
         if (json.has("defaultTagOrdering")) {
             this.defaultTagOrdering = Ordering.valueOf(json.getString("defaultTagOrdering"));
             logger.fine("Changed default tag ordering to: " + defaultTagOrdering);
+        }
+        if (json.has("defaultTagProvider")) {
+            this.defaultTagProvider = Provider.valueOf(json.getString("defaultTagProvider"));
+            logger.fine("Changed default tag provider to: " + defaultTagProvider);
+        }
+        if (json.has("defaultTagAWSRegion")) {
+            this.defaultTagAWSRegion = Regions.valueOf(json.getString("defaultTagAWSRegion"));
+            logger.fine("Changed default tag aws region to: " + defaultTagAWSRegion);
+        }
+        if (json.has("ecrImageName")) {
+            this.ecrImageName = json.getString("ecrImageName");
+            logger.fine("Changed image name to: " + ecrImageName);
         }
         save();
         return true;
@@ -88,16 +119,45 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
         save();
     }
 
+    @DataBoundSetter
+    @SuppressWarnings("unused")
+    public void setDefaultTagProvider(Provider defaultTagProvider) {
+        logger.info("Changing default tag provider to: " + defaultTagOrdering);
+        this.defaultTagProvider = defaultTagProvider;
+        save();
+    }
+
+    @DataBoundSetter
+    @SuppressWarnings("unused")
+    public void setDefaultTagAWSRegion(Regions defaultTagAWSRegion) {
+        logger.info("Changing default tag aws region to: " + defaultTagAWSRegion);
+        this.defaultTagAWSRegion = defaultTagAWSRegion;
+        save();
+    }
+
+    @DataBoundSetter
+    @SuppressWarnings("unused")
+    public void setEcrImageName(String ecrImageName) {
+        logger.info("Changing ecr image name to: " + defaultTagAWSRegion);
+        this.ecrImageName = ecrImageName;
+        save();
+    }
+
     @SuppressWarnings("unused")
     public ListBoxModel doFillDefaultCredentialIdItems(@QueryParameter String credentialsId) {
         if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
             logger.info("No permission to list credential");
             return new StandardListBoxModel().includeCurrentValue(defaultCredentialId);
         }
-        return new StandardListBoxModel()
+        ListBoxModel allCredentials = new ListBoxModel();
+        allCredentials
+            .addAll(AWSCredentialsHelper.doFillCredentialsIdItems(Jenkins.get()));
+        allCredentials
+            .addAll(new StandardListBoxModel()
             .includeEmptyValue()
             .includeAs(ACL.SYSTEM, Jenkins.get(), StandardUsernameCredentials.class)
-            .includeCurrentValue(defaultCredentialId);
+            .includeCurrentValue(defaultCredentialId));
+        return allCredentials;
     }
 
 }
