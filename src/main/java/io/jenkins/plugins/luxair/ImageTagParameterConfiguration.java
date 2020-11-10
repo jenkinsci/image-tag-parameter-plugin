@@ -13,7 +13,6 @@ import io.jenkins.plugins.luxair.util.StringUtil;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.graalvm.compiler.options.SuppressFBWarnings;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -122,7 +121,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
     @DataBoundSetter
     @SuppressWarnings("unused")
     public void setDefaultTagProvider(Provider defaultTagProvider) {
-        logger.info("Changing default tag provider to: " + defaultTagOrdering);
+        logger.info("Changing default tag provider to: " + defaultTagProvider);
         this.defaultTagProvider = defaultTagProvider;
         save();
     }
@@ -138,7 +137,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
     @DataBoundSetter
     @SuppressWarnings("unused")
     public void setEcrImageName(String ecrImageName) {
-        logger.info("Changing ecr image name to: " + defaultTagAWSRegion);
+        logger.info("Changing ecr image name to: " + ecrImageName);
         this.ecrImageName = ecrImageName;
         save();
     }
