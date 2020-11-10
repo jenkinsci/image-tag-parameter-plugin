@@ -3,6 +3,7 @@ package io.jenkins.plugins.luxair;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.cloudbees.jenkins.plugins.awscredentials.AWSCredentialsHelper;
+import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
@@ -23,6 +24,7 @@ import net.sf.json.JSONObject;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.*;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
@@ -57,10 +59,10 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     @SuppressWarnings("unused")
     public ImageTagParameterDefinition(String name, String description, String image, String filter,
                                        String registry, String credentialId, String ecrImageName) {
-        this(name, description, image, filter, "","", registry, credentialId, config.getDefaultTagOrdering(), config.getDefaultTagProvider(), config.getDefaultTagAWSRegion(), config.getEcrImageName());
+        this(name, description, image, filter, "","", "",registry, credentialId, config.getDefaultTagOrdering(), config.getDefaultTagProvider(), config.getDefaultTagAWSRegion(), config.getEcrImageName());
     }
 
-    public ImageTagParameterDefinition(String name, String description, String image, String filter, String defaultTag, String defaultProvider,
+    public ImageTagParameterDefinition(String name, String description, String image, String filter, String defaultTag, String defaultProvider, String defaultAWSRegion,
                                        String registry, String credentialId, Ordering tagOrder, Provider tagProvider, Regions tagAWSRegions, String ecrImageName) {
         super(name, description);
         this.image = image;
@@ -214,13 +216,18 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     private AWSCredentials findAWSCredentials(String credentialId) {
         try {
             if(StringUtil.isNotNullOrEmpty(credentialId)) {
-                return AWSCredentialsHelper.getCredentials(credentialId, Jenkins.get()).getCredentials();
+                AmazonWebServicesCredentials amazonWebServicesCredentials = AWSCredentialsHelper.getCredentials(credentialId, Jenkins.get());
+                if(amazonWebServicesCredentials != null) {
+                   return amazonWebServicesCredentials.getCredentials();
+                }
+                logger.info("CredentialId is empty");
+                return null;
             } else {
                 logger.info("CredentialId is empty");
                 return null;
             }
         } catch(Exception e) {
-            logger.warning("Cannot find aws credential for :" + credentialId + ":");
+            logger.warning("Cannot find aws credential for :" + credentialId + ":" + e.getMessage());
             return null;
         }
     }
@@ -252,7 +259,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         if (defaultValue instanceof ImageTagParameterValue) {
             ImageTagParameterValue value = (ImageTagParameterValue) defaultValue;
             return new ImageTagParameterDefinition(getName(), getDescription(),
-                getImage(), getFilter(), value.getImageTag(), getDefaultProvider(),
+                getImage(), getFilter(), value.getImageTag(), getDefaultProvider(), getDefaultAWSRegion(),
                 getRegistry(), getCredentialId(), getTagOrder(), getTagProvider(), getTagAWSRegions(), getEcrImageName());
         }
         return this;
