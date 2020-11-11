@@ -5,6 +5,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.ParameterValue;
 import hudson.model.Run;
 import hudson.util.VariableResolver;
+import io.jenkins.plugins.luxair.util.StringUtil;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -26,18 +27,27 @@ public class ImageTagParameterValue extends ParameterValue {
 
     @Exported(visibility = 4)
     @Restricted(NoExternalUse.class)
+    public String ecrImageName;
+
+    @Exported(visibility = 4)
+    @Restricted(NoExternalUse.class)
     public String value;
 
     @DataBoundConstructor
-    public ImageTagParameterValue(String name, String imageName, String imageTag) {
-        this(name, imageName, imageTag, null);
+    public ImageTagParameterValue(String name, String imageName, String imageTag, String ecrImageName) {
+        this(name, imageName, imageTag, null, ecrImageName);
     }
 
-    public ImageTagParameterValue(String name, String imageName, String imageTag, String description) {
+    public ImageTagParameterValue(String name, String imageName, String imageTag, String description, String ecrImageName) {
         super(name, description);
         this.imageName = imageName;
         this.imageTag = imageTag;
-        this.value = String.format("%s:%s", imageName, imageTag);
+        this.ecrImageName = ecrImageName;
+        if(StringUtil.isNotNullOrEmpty(ecrImageName)) {
+            this.value = String.format("%s:%s", ecrImageName, imageTag);
+        } else {
+            this.value = String.format("%s:%s", imageName, imageTag);
+        }
     }
 
     public String getImageName() {
@@ -51,6 +61,10 @@ public class ImageTagParameterValue extends ParameterValue {
     @Override
     public String getValue() {
         return value;
+    }
+
+    public String getEcrImageName() {
+        return ecrImageName;
     }
 
     /**

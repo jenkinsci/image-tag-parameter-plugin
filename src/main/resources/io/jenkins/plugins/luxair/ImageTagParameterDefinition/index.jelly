@@ -8,6 +8,7 @@
             <input type="hidden" name="name" value="${it.name}" />
             <input type="hidden" name="description" value="${it.description}" />
             <input type="hidden" name="imageName" value="${it.image}" />
+            <input type="hidden" name="ecrImageName" value="${it.ecrImageName}" />
 
             <select name="imageTag" style="min-width:18rem;">
                 <j:forEach var="aTag" items="${it.tags}" varStatus="loop">

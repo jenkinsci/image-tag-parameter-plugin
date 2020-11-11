@@ -1,5 +1,15 @@
 package io.jenkins.plugins.luxair;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.ecr.AmazonECR;
+import com.amazonaws.services.ecr.AmazonECRClient;
+import com.amazonaws.services.ecr.model.*;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
+import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest;
+import com.amazonaws.services.securitytoken.model.GetCallerIdentityResult;
 import hudson.util.VersionNumber;
 import io.jenkins.plugins.luxair.model.Ordering;
 import io.jenkins.plugins.luxair.model.ResultContainer;
@@ -24,6 +34,49 @@ public class ImageTag {
 
     private ImageTag() {
         throw new IllegalStateException("Utility class");
+    }
+
+    public static String getAWSUserId(String accessKey, String secretKey) {
+        try {
+            AWSSecurityTokenService stsService = AWSSecurityTokenServiceClientBuilder
+                .standard()
+                .withCredentials(
+                    new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))
+                ).build();
+            GetCallerIdentityResult callerIdentityResult = stsService.getCallerIdentity(new GetCallerIdentityRequest());
+            return callerIdentityResult.getAccount();
+        } catch (Exception e) {
+            logger.warning("Unable to get credentials...");
+            return null;
+        }
+    }
+
+    public static ResultContainer<List<String>> getAWSECRTags(String image, String region, String filter, String accessKey, String secretKey, Ordering ordering) {
+        ResultContainer<List<String>> container = new ResultContainer<>(Collections.emptyList());
+
+        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+        Regions regionName = Regions.fromName(region);
+
+        AmazonECR client = AmazonECRClient
+            .builder()
+            .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+            .withRegion(regionName)
+            .build();
+
+        ListImagesRequest listImagesRequest = new ListImagesRequest();
+        listImagesRequest.setRepositoryName(image);
+        ListImagesResult listImagesResult = client.listImages(listImagesRequest);
+
+        ResultContainer<List<VersionNumber>> resultContainer = new ResultContainer<>(new ArrayList<>());
+        listImagesResult.getImageIds().forEach((ImageIdentifier e) -> {
+            resultContainer.getValue().add(new VersionNumber(e.getImageTag()));
+        });
+
+        ResultContainer<List<String>> filterTags = filterTags(resultContainer.getValue(), filter, ordering);
+        filterTags.getValue().stream().map(String::toString);
+        filterTags.getErrorMsg().ifPresent(container::setErrorMsg);
+        container.setValue(filterTags.getValue());
+        return container;
     }
 
     public static ResultContainer<List<String>> getTags(String image, String registry, String filter,
