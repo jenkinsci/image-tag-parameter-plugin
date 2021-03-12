@@ -124,9 +124,9 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
 
         ResultContainer<List<String>> resultContainer = ImageTag
             .getTags(image, registry, filter, user, password, getTagOrder());
-        Optional<String> optionalErrorMsg = resultContainer.getErrorMsg();
+        Optional<List<String>> optionalErrorMsg = resultContainer.getErrorMsgs();
         if (optionalErrorMsg.isPresent()) {
-            setErrorMsg(optionalErrorMsg.get());
+            setErrorMsg(String.join("</br>", optionalErrorMsg.get()));
         } else {
             setErrorMsg("");
         }

@@ -1,21 +1,30 @@
 package io.jenkins.plugins.luxair.model;
 
 import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ResultContainer<V> {
-    private String errorMsg = null;
+    private List<String> errorMsgs = null;
     private V value;
 
     public ResultContainer(V defaultValue) {
         this.value = defaultValue;
     }
 
-    public void setErrorMsg(String errorMsg) {
-        this.errorMsg = errorMsg;
+    public void addErrorMsg(String errorMsg) {
+        if (this.errorMsgs == null) {
+            this.errorMsgs = new ArrayList<String>();
+        }
+        this.errorMsgs.add(errorMsg);
     }
 
-    public Optional<String> getErrorMsg() {
-        return Optional.ofNullable(errorMsg);
+    public Optional<List<String>> getErrorMsgs() {
+        return Optional.ofNullable(this.errorMsgs);
+    }
+
+    public void setErrorMsgs(List<String> errorMsgs) {
+        this.errorMsgs = errorMsgs;
     }
 
     public void setValue(V value) {
