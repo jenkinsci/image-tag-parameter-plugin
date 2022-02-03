@@ -39,6 +39,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     private String defaultTag;
     private Ordering tagOrder;
     private String errorMsg = "";
+    private boolean verifySsl = true;
 
     @DataBoundConstructor
     @SuppressWarnings("unused")
@@ -101,8 +102,18 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     public void setErrorMsg(String errorMsg) {
         this.errorMsg = errorMsg;
     }
+    
+    public boolean isVerifySsl() {
+		return verifySsl;
+	}
 
-    private String getDefaultOrEmptyCredentialId(String registry, String credentialId) {
+    @DataBoundSetter
+    @SuppressWarnings("unused")    
+	public void setVerifySsl(boolean verifySsl) {
+		this.verifySsl = verifySsl;
+	}
+
+	private String getDefaultOrEmptyCredentialId(String registry, String credentialId) {
         if (registry.equals(config.getDefaultRegistry()) && !StringUtil.isNotNullOrEmpty(credentialId)) {
             return config.getDefaultCredentialId();
         } else if (StringUtil.isNotNullOrEmpty(credentialId)) {
@@ -123,7 +134,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         }
 
         ResultContainer<List<String>> resultContainer = ImageTag
-            .getTags(image, registry, filter, user, password, getTagOrder());
+            .getTags(image, registry, filter, user, password, getTagOrder(), verifySsl);
         Optional<String> optionalErrorMsg = resultContainer.getErrorMsg();
         if (optionalErrorMsg.isPresent()) {
             setErrorMsg(optionalErrorMsg.get());
@@ -202,6 +213,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
             return config.getDefaultTagOrdering();
         }
 
+        
         @SuppressWarnings("unused")
         public ListBoxModel doFillCredentialIdItems(@AncestorInPath Item context,
                                                     @QueryParameter String credentialId) {

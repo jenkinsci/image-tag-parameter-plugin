@@ -27,12 +27,12 @@ public class ImageTag {
     }
 
     public static ResultContainer<List<String>> getTags(String image, String registry, String filter,
-                                                        String user, String password, Ordering ordering) {
+                                                        String user, String password, Ordering ordering, boolean verifySsl) {
         ResultContainer<List<String>> container = new ResultContainer<>(Collections.emptyList());
 
         String[] authService = getAuthService(registry);
         String token = getAuthToken(authService, image, user, password);
-        ResultContainer<List<VersionNumber>> tags = getImageTagsFromRegistry(image, registry, authService[0], token);
+        ResultContainer<List<VersionNumber>> tags = getImageTagsFromRegistry(image, registry, authService[0], token, verifySsl);
 
         if (tags.getErrorMsg().isPresent()) {
             container.setErrorMsg(tags.getErrorMsg().get());
@@ -172,12 +172,13 @@ public class ImageTag {
     }
 
     private static ResultContainer<List<VersionNumber>> getImageTagsFromRegistry(String image, String registry,
-                                                                                 String authType, String token) {
+                                                                                 String authType, String token, boolean verifySsl) {
         ResultContainer<List<VersionNumber>> resultContainer = new ResultContainer<>(new ArrayList<>());
         String url = registry + "/v2/" + image + "/tags/list";
 
         Unirest.config().reset();
         Unirest.config().enableCookieManagement(false).interceptor(errorInterceptor);
+        Unirest.config().verifySsl(verifySsl);
         HttpResponse<JsonNode> response = Unirest.get(url)
             .header("Authorization", authType + " " + token)
             .asJson();

@@ -29,6 +29,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
     private String defaultRegistry = DEFAULT_REGISTRY;
     private String defaultCredentialId = "";
     private Ordering defaultTagOrdering = Ordering.NATURAL;
+    private boolean defaultVerifySsl = true;
 
     public ImageTagParameterConfiguration() {
         load();
@@ -45,7 +46,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
     public Ordering getDefaultTagOrdering() {
         return defaultTagOrdering != null ? defaultTagOrdering : Ordering.NATURAL;
     }
-
+    
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) {
         if (json.has("defaultRegistry")) {
