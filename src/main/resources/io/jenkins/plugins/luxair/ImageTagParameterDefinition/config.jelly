@@ -35,8 +35,8 @@
             <f:enum default="${descriptor.getDefaultTagOrdering().name()}">${it}</f:enum>
         </f:entry>
 
-        <f:entry title="${%HTML Form Element Type for Picker}" field="formElementTypeForTagPicker">
-            <f:enum default="${descriptor.getDefaultFormElementTypeForTagPicker().name()}">${it}</f:enum>
+        <f:entry title="${%HTML Form Element Type for Picker}" field="tagPickerType">
+            <f:enum default="${descriptor.getDefaultTagPickerType().name()}">${it}</f:enum>
         </f:entry>
 
         <f:entry title="${%Verify SSL}" field="verifySsl">

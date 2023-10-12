@@ -39,19 +39,19 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     private final String credentialId;
     private String defaultTag;
     private Ordering tagOrder;
-    private TagPickerType formElementTypeForTagPicker;
+    private TagPickerType tagPickerType;
     private String errorMsg = "";
     private boolean verifySsl = true;
 
     @DataBoundConstructor
     @SuppressWarnings("unused")
     public ImageTagParameterDefinition(String name, String description, String image, String filter,
-                                       String registry, String credentialId, TagPickerType formElementTypeForTagPicker) {
-        this(name, description, image, filter, "", registry, credentialId, config.getDefaultTagOrdering(), formElementTypeForTagPicker);
+                                       String registry, String credentialId, TagPickerType tagPickerType) {
+        this(name, description, image, filter, "", registry, credentialId, config.getDefaultTagOrdering(), tagPickerType);
     }
 
     public ImageTagParameterDefinition(String name, String description, String image, String filter, String defaultTag,
-                                       String registry, String credentialId, Ordering tagOrder, TagPickerType formElementTypeForTagPicker) {
+                                       String registry, String credentialId, Ordering tagOrder, TagPickerType tagPickerType) {
         super(name, description);
         this.image = image;
         this.registry = StringUtil.isNotNullOrEmpty(registry) ? registry : config.getDefaultRegistry();
@@ -59,7 +59,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         this.defaultTag = StringUtil.isNotNullOrEmpty(defaultTag) ? defaultTag : "";
         this.credentialId = getDefaultOrEmptyCredentialId(this.registry, credentialId);
         this.tagOrder = tagOrder != null ? tagOrder : config.getDefaultTagOrdering();
-        this.formElementTypeForTagPicker = formElementTypeForTagPicker != null ? formElementTypeForTagPicker : config.getDefaultFormElementTypeForTagPicker();
+        this.tagPickerType = tagPickerType != null ? tagPickerType : config.getDefaultTagPickerType();
     }
 
     public String getImage() {
@@ -98,12 +98,12 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         this.tagOrder = tagOrder;
     }
 
-    public TagPickerType getFormElementTypeForTagPicker() {
-        return formElementTypeForTagPicker;
+    public TagPickerType getTagPickerType() {
+        return tagPickerType;
     }
 
-    public void setFormElementTypeForTagPicker(TagPickerType formElementTypeForTagPicker) {
-        this.formElementTypeForTagPicker = formElementTypeForTagPicker;
+    public void setTagPickerType(TagPickerType tagPickerType) {
+        this.tagPickerType = tagPickerType;
     }
 
     public String getErrorMsg() {
@@ -184,7 +184,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
             ImageTagParameterValue value = (ImageTagParameterValue) defaultValue;
             return new ImageTagParameterDefinition(getName(), getDescription(),
                 getImage(), getFilter(), value.getImageTag(),
-                getRegistry(), getCredentialId(), getTagOrder(), getFormElementTypeForTagPicker());
+                getRegistry(), getCredentialId(), getTagOrder(), getTagPickerType());
         }
         return this;
     }
@@ -224,8 +224,9 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
             return config.getDefaultTagOrdering();
         }
 
-        public TagPickerType getDefaultFormElementTypeForTagPicker() {
-            return config.getDefaultFormElementTypeForTagPicker();
+        @SuppressWarnings("unused")
+        public TagPickerType getDefaultTagPickerType() {
+            return config.getDefaultTagPickerType();
         }
 
         @SuppressWarnings("unused")

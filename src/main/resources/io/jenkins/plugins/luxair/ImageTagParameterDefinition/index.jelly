@@ -8,7 +8,7 @@
             <input type="hidden" name="name" value="${it.name}" />
             <input type="hidden" name="description" value="${it.description}" />
             <input type="hidden" name="imageName" value="${it.image}" />
-            <j:switch on="${it.formElementTypeForTagPicker.name()}">
+            <j:switch on="${it.tagPickerType.name()}">
                 <j:case value="SELECT">
                     <select name="imageTag" style="min-width:18rem;">
                         <j:forEach var="aTag" items="${it.tags}" varStatus="loop">
@@ -46,7 +46,7 @@
                     </script>
                 </j:case>
                 <j:default>
-                    <p style="color:red">Error: unknown HTML Form Element Type for Picker "${it.formElementTypeForTagPicker.name()}"</p>
+                    <p style="color:red">Error: Unknown tag picker type "${it.tagPickerType.name()}"</p>
                 </j:default>
             </j:switch>
         </div>

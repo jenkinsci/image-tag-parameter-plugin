@@ -30,7 +30,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
     private String defaultRegistry = DEFAULT_REGISTRY;
     private String defaultCredentialId = "";
     private Ordering defaultTagOrdering = Ordering.NATURAL;
-    private TagPickerType defaultFormElementTypeForTagPicker = TagPickerType.SELECT;
+    private TagPickerType defaultTagPickerType = TagPickerType.SELECT;
     private boolean defaultVerifySsl = true;
 
     public ImageTagParameterConfiguration() {
@@ -49,8 +49,8 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
         return defaultTagOrdering != null ? defaultTagOrdering : Ordering.NATURAL;
     }
 
-    public TagPickerType getDefaultFormElementTypeForTagPicker() {
-        return defaultFormElementTypeForTagPicker;
+    public TagPickerType getDefaultTagPickerType() {
+        return defaultTagPickerType;
     }
 
     @Override
@@ -67,9 +67,9 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
             this.defaultTagOrdering = Ordering.valueOf(json.getString("defaultTagOrdering"));
             logger.fine("Changed default tag ordering to: " + defaultTagOrdering);
         }
-        if (json.has("defaultFormElementTypeForTagPicker")) {
-            this.defaultFormElementTypeForTagPicker = TagPickerType.valueOf(json.getString("defaultFormElementTypeForTagPicker"));
-            logger.fine("Change default HTML Form Element Type for Tag Picker to: " + defaultFormElementTypeForTagPicker);
+        if (json.has("defaultTagPickerType")) {
+            this.defaultTagPickerType = TagPickerType.valueOf(json.getString("defaultTagPickerType"));
+            logger.fine("Change default HTML Form Element Type for Tag Picker to: " + defaultTagPickerType);
         }
         save();
         return true;
@@ -101,8 +101,8 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
 
     @DataBoundSetter
     @SuppressWarnings("unused")
-    public void setDefaultFormElementTypeForTagPicker(TagPickerType defaultFormElementTypeForTagPicker) {
-        this.defaultFormElementTypeForTagPicker = defaultFormElementTypeForTagPicker;
+    public void setDefaultTagPickerType(TagPickerType defaultTagPickerType) {
+        this.defaultTagPickerType = defaultTagPickerType;
     }
 
     @SuppressWarnings("unused")
