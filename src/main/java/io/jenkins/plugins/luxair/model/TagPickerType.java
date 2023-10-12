@@ -1,5 +1,5 @@
 package io.jenkins.plugins.luxair.model;
 
-public enum HtmlFormElement {
+public enum TagPickerType {
     SELECT, AUTOCOMPLETE
 }

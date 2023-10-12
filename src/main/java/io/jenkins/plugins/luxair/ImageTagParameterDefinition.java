@@ -11,7 +11,7 @@ import hudson.model.ParameterValue;
 import hudson.model.SimpleParameterDefinition;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
-import io.jenkins.plugins.luxair.model.HtmlFormElement;
+import io.jenkins.plugins.luxair.model.TagPickerType;
 import io.jenkins.plugins.luxair.model.Ordering;
 import io.jenkins.plugins.luxair.model.ResultContainer;
 import io.jenkins.plugins.luxair.util.StringUtil;
@@ -39,19 +39,19 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     private final String credentialId;
     private String defaultTag;
     private Ordering tagOrder;
-    private HtmlFormElement formElementTypeForTagPicker;
+    private TagPickerType formElementTypeForTagPicker;
     private String errorMsg = "";
     private boolean verifySsl = true;
 
     @DataBoundConstructor
     @SuppressWarnings("unused")
     public ImageTagParameterDefinition(String name, String description, String image, String filter,
-                                       String registry, String credentialId, HtmlFormElement formElementTypeForTagPicker) {
+                                       String registry, String credentialId, TagPickerType formElementTypeForTagPicker) {
         this(name, description, image, filter, "", registry, credentialId, config.getDefaultTagOrdering(), formElementTypeForTagPicker);
     }
 
     public ImageTagParameterDefinition(String name, String description, String image, String filter, String defaultTag,
-                                       String registry, String credentialId, Ordering tagOrder, HtmlFormElement formElementTypeForTagPicker) {
+                                       String registry, String credentialId, Ordering tagOrder, TagPickerType formElementTypeForTagPicker) {
         super(name, description);
         this.image = image;
         this.registry = StringUtil.isNotNullOrEmpty(registry) ? registry : config.getDefaultRegistry();
@@ -98,11 +98,11 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         this.tagOrder = tagOrder;
     }
 
-    public HtmlFormElement getFormElementTypeForTagPicker() {
+    public TagPickerType getFormElementTypeForTagPicker() {
         return formElementTypeForTagPicker;
     }
 
-    public void setFormElementTypeForTagPicker(HtmlFormElement formElementTypeForTagPicker) {
+    public void setFormElementTypeForTagPicker(TagPickerType formElementTypeForTagPicker) {
         this.formElementTypeForTagPicker = formElementTypeForTagPicker;
     }
 
@@ -224,7 +224,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
             return config.getDefaultTagOrdering();
         }
 
-        public HtmlFormElement getDefaultFormElementTypeForTagPicker() {
+        public TagPickerType getDefaultFormElementTypeForTagPicker() {
             return config.getDefaultFormElementTypeForTagPicker();
         }
 

@@ -5,7 +5,7 @@ import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import hudson.Extension;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
-import io.jenkins.plugins.luxair.model.HtmlFormElement;
+import io.jenkins.plugins.luxair.model.TagPickerType;
 import io.jenkins.plugins.luxair.model.Ordering;
 import io.jenkins.plugins.luxair.util.StringUtil;
 import jenkins.model.GlobalConfiguration;
@@ -30,7 +30,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
     private String defaultRegistry = DEFAULT_REGISTRY;
     private String defaultCredentialId = "";
     private Ordering defaultTagOrdering = Ordering.NATURAL;
-    private HtmlFormElement defaultFormElementTypeForTagPicker = HtmlFormElement.SELECT;
+    private TagPickerType defaultFormElementTypeForTagPicker = TagPickerType.SELECT;
     private boolean defaultVerifySsl = true;
 
     public ImageTagParameterConfiguration() {
@@ -49,7 +49,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
         return defaultTagOrdering != null ? defaultTagOrdering : Ordering.NATURAL;
     }
 
-    public HtmlFormElement getDefaultFormElementTypeForTagPicker() {
+    public TagPickerType getDefaultFormElementTypeForTagPicker() {
         return defaultFormElementTypeForTagPicker;
     }
 
@@ -68,7 +68,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
             logger.fine("Changed default tag ordering to: " + defaultTagOrdering);
         }
         if (json.has("defaultFormElementTypeForTagPicker")) {
-            this.defaultFormElementTypeForTagPicker = HtmlFormElement.valueOf(json.getString("defaultFormElementTypeForTagPicker"));
+            this.defaultFormElementTypeForTagPicker = TagPickerType.valueOf(json.getString("defaultFormElementTypeForTagPicker"));
             logger.fine("Change default HTML Form Element Type for Tag Picker to: " + defaultFormElementTypeForTagPicker);
         }
         save();
@@ -101,7 +101,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
 
     @DataBoundSetter
     @SuppressWarnings("unused")
-    public void setDefaultFormElementTypeForTagPicker(HtmlFormElement defaultFormElementTypeForTagPicker) {
+    public void setDefaultFormElementTypeForTagPicker(TagPickerType defaultFormElementTypeForTagPicker) {
         this.defaultFormElementTypeForTagPicker = defaultFormElementTypeForTagPicker;
     }
 
