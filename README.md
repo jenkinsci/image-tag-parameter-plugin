@@ -21,6 +21,8 @@ It uses the Docker **Registry HTTP API V2** to list tags available for an image.
 
 ![Image Selection](img/screen03.png)
 
+![Image Selection](img/screen04.png)
+
 ![Global Configuration](img/jenkinsConfig.png)
 
 ## Usage
@@ -40,6 +42,7 @@ unclassified:
     defaultRegistry: "https://registry-1.docker.io"
     defaultCredentialId: ""
     defaultTagOrdering: DSC_VERSION
+    defaultTagPickerType: SELECT
 # ...
 ```
 
@@ -57,12 +60,14 @@ pipeline {
   parameters {
     imageTag(name: 'DOCKER_IMAGE', description: '',
              image: 'jenkins/jenkins', filter: 'lts.*', defaultTag: 'lts-jdk11',
-             registry: 'https://registry-1.docker.io', credentialId: '', tagOrder: 'NATURAL')
+             registry: 'https://registry-1.docker.io', credentialId: '' /* Use empty String to enforce query without authentication (for example ignore global default authentication) */,
+             tagOrder: 'NATURAL', tagPickerType: 'AUTOCOMPLETE_STRICT')
   }
 
   stages {
     stage('Test') {
       steps {
+        echo params.DOCKER_IMAGE
         echo "$DOCKER_IMAGE" // will print selected image name with tag (eg. jenkins/jenkins:lts-jdk11)
         echo "$DOCKER_IMAGE_TAG" // will print selected tag value (eg. lts-jdk11)
         echo "$DOCKER_IMAGE_IMAGE" // will print selected image name value (eg. jenkins/jenkins)
