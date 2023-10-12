@@ -54,7 +54,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
             logger.fine("Changed default registry to: " + defaultRegistry);
         }
         if (json.has("defaultCredentialId")) {
-            this.defaultRegistry = json.getString("defaultCredentialId");
+            this.defaultCredentialId = json.getString("defaultCredentialId");
             logger.fine("Changed default registry credentialsId to: " + defaultCredentialId);
         }
         if (json.has("defaultTagOrdering")) {
