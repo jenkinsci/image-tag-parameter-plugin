@@ -56,7 +56,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) {
         if (json.has("defaultRegistry")) {
-            this.defaultRegistry = json.getString("defaultRegistry");
+            this.defaultRegistry = StringUtil.removeTrailingSlash(json.getString("defaultRegistry"));
             logger.fine("Changed default registry to: " + defaultRegistry);
         }
         if (json.has("defaultCredentialId")) {
