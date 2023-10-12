@@ -21,12 +21,29 @@
                     </select>
                 </j:case>
                 <j:case value="AUTOCOMPLETE">
-                    <input list="availableTags" class="jenkins-input" name="imageTag" value="${it.defaultTag}"/>
-                    <datalist id="availableTags">
+                    <input list="availableTags-${it.name}" class="jenkins-input" name="imageTag" value="${it.defaultTag}"/>
+                    <datalist id="availableTags-${it.name}">
                         <j:forEach var="aTag" items="${it.tags}" varStatus="loop">
                             <option value="${aTag}"/>
                         </j:forEach>
                     </datalist>
+                </j:case>
+                <j:case value="AUTOCOMPLETE_STRICT">
+                    <input id="imageTag-${it.name}" list="availableTags-${it.name}" class="jenkins-input" name="imageTag" value="${it.defaultTag}"/>
+                    <datalist id="availableTags-${it.name}">
+                        <j:forEach var="aTag" items="${it.tags}" varStatus="loop">
+                            <option value="${aTag}"/>
+                        </j:forEach>
+                    </datalist>
+                    <script>
+                        const availableTags = Array.from(document.getElementById('availableTags-${it.name}').options).map(option => option.value);
+                        const input = document.getElementById("imageTag-${it.name}");
+                        input.addEventListener('change', e => {
+                            if (!availableTags.includes(input.value)) {
+                                input.value = "${it.defaultTag}";
+                            }
+                        });
+                    </script>
                 </j:case>
                 <j:default>
                     <p style="color:red">Error: unknown HTML Form Element Type for Picker "${it.formElementTypeForTagPicker.name()}"</p>
