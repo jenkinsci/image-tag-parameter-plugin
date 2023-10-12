@@ -8,17 +8,27 @@
             <input type="hidden" name="name" value="${it.name}" />
             <input type="hidden" name="description" value="${it.description}" />
             <input type="hidden" name="imageName" value="${it.image}" />
-
-            <select name="imageTag" style="min-width:18rem;">
-                <j:forEach var="aTag" items="${it.tags}" varStatus="loop">
-                    <j:choose>
-                        <f:option value="${aTag}" selected="${aTag.equals(it.defaultTag)}">
-                            ${it.image}:${aTag}
-                        </f:option>
-                    </j:choose>
-                </j:forEach>
-            </select>
-
+            <j:choose>
+                <j:when test="${it.formElementTypeForTagPicker.name() == 'AUTOCOMPLETE'}">
+                    <input list="availableTags" class="jenkins-input" name="imageTag" value="${it.defaultTag}"/>
+                    <datalist id="availableTags">
+                        <j:forEach var="aTag" items="${it.tags}" varStatus="loop">
+                            <option value="${aTag}"/>
+                        </j:forEach>
+                    </datalist>
+                </j:when>
+                <j:otherwise>
+                    <select name="imageTag" style="min-width:18rem;">
+                        <j:forEach var="aTag" items="${it.tags}" varStatus="loop">
+                            <j:choose>
+                                <f:option value="${aTag}" selected="${aTag.equals(it.defaultTag)}">
+                                    ${it.image}:${aTag}
+                                </f:option>
+                            </j:choose>
+                        </j:forEach>
+                    </select>
+                </j:otherwise>
+            </j:choose>
         </div>
         <div name="errorMsg" display="${it.errorMsg == '' ? 'none' : ''}" style="color: red">
             ${it.errorMsg}

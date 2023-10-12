@@ -89,6 +89,12 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
         save();
     }
 
+    @DataBoundSetter
+    @SuppressWarnings("unused")
+    public void setDefaultFormElementTypeForTagPicker(HtmlFormElement defaultFormElementTypeForTagPicker) {
+        this.defaultFormElementTypeForTagPicker = defaultFormElementTypeForTagPicker;
+    }
+
     @SuppressWarnings("unused")
     public ListBoxModel doFillDefaultCredentialIdItems(@QueryParameter String credentialsId) {
         if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {

@@ -11,6 +11,7 @@ import hudson.model.ParameterValue;
 import hudson.model.SimpleParameterDefinition;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
+import io.jenkins.plugins.luxair.model.HtmlFormElement;
 import io.jenkins.plugins.luxair.model.Ordering;
 import io.jenkins.plugins.luxair.model.ResultContainer;
 import io.jenkins.plugins.luxair.util.StringUtil;
@@ -38,18 +39,19 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     private final String credentialId;
     private String defaultTag;
     private Ordering tagOrder;
+    private HtmlFormElement formElementTypeForTagPicker;
     private String errorMsg = "";
     private boolean verifySsl = true;
 
     @DataBoundConstructor
     @SuppressWarnings("unused")
     public ImageTagParameterDefinition(String name, String description, String image, String filter,
-                                       String registry, String credentialId) {
-        this(name, description, image, filter, "", registry, credentialId, config.getDefaultTagOrdering());
+                                       String registry, String credentialId, HtmlFormElement formElementTypeForTagPicker) {
+        this(name, description, image, filter, "", registry, credentialId, config.getDefaultTagOrdering(), formElementTypeForTagPicker);
     }
 
     public ImageTagParameterDefinition(String name, String description, String image, String filter, String defaultTag,
-                                       String registry, String credentialId, Ordering tagOrder) {
+                                       String registry, String credentialId, Ordering tagOrder, HtmlFormElement formElementTypeForTagPicker) {
         super(name, description);
         this.image = image;
         this.registry = StringUtil.isNotNullOrEmpty(registry) ? registry : config.getDefaultRegistry();
@@ -57,6 +59,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         this.defaultTag = StringUtil.isNotNullOrEmpty(defaultTag) ? defaultTag : "";
         this.credentialId = getDefaultOrEmptyCredentialId(this.registry, credentialId);
         this.tagOrder = tagOrder != null ? tagOrder : config.getDefaultTagOrdering();
+        this.formElementTypeForTagPicker = formElementTypeForTagPicker != null ? formElementTypeForTagPicker : config.getDefaultFormElementTypeForTagPicker();
     }
 
     public String getImage() {
@@ -95,6 +98,14 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         this.tagOrder = tagOrder;
     }
 
+    public HtmlFormElement getFormElementTypeForTagPicker() {
+        return formElementTypeForTagPicker;
+    }
+
+    public void setFormElementTypeForTagPicker(HtmlFormElement formElementTypeForTagPicker) {
+        this.formElementTypeForTagPicker = formElementTypeForTagPicker;
+    }
+
     public String getErrorMsg() {
         return errorMsg;
     }
@@ -108,7 +119,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
 	}
 
     @DataBoundSetter
-    @SuppressWarnings("unused")    
+    @SuppressWarnings("unused")
 	public void setVerifySsl(boolean verifySsl) {
 		this.verifySsl = verifySsl;
 	}
@@ -173,7 +184,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
             ImageTagParameterValue value = (ImageTagParameterValue) defaultValue;
             return new ImageTagParameterDefinition(getName(), getDescription(),
                 getImage(), getFilter(), value.getImageTag(),
-                getRegistry(), getCredentialId(), getTagOrder());
+                getRegistry(), getCredentialId(), getTagOrder(), getFormElementTypeForTagPicker());
         }
         return this;
     }
@@ -211,6 +222,10 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         @SuppressWarnings("unused")
         public Ordering getDefaultTagOrdering() {
             return config.getDefaultTagOrdering();
+        }
+
+        public HtmlFormElement getDefaultFormElementTypeForTagPicker() {
+            return config.getDefaultFormElementTypeForTagPicker();
         }
 
         @SuppressWarnings("unused")
