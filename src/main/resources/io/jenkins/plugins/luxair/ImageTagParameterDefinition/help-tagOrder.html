@@ -1,21 +1,18 @@
 <div>
-    <div>
+    <p>
         Allows the user to alter the ordering of the ImageTags in the build parameter.
-    </div>
-    <br/>
-    <div>
+    </p>
+    <p>
         <strong>Natural Ordering</strong> ... same Ordering as the tags had in prior versions<br/>
         <strong>Reverse Natural Ordering</strong> ... the reversed original ordering<br/>
-        <strong>Descending Versions</strong> ... attempts to pars the tags to a version and order them descending<br/>
-        <strong>Ascending Versions</strong> ... attempts to pars the tags to a version and order them ascending<br/>
-    </div>
-    <br/>
-    <div>
+        <strong>Descending Versions</strong> ... tries to parse the tags as versions and arrange them in descending order.<br/>
+        <strong>Ascending Versions</strong> ... attempts to parse the tags to a version and order them ascending.
+    </p>
+    <p>
         <strong>WARNING:</strong><br/>
-        Careful with Versioned sorting, this works best with <a href="https://semver.org/">semver</a> or maven version compliant
-        ImageTags, but won't work at all under certain circumstances!<br/>
-        The conversion from tags to versions can fail in certain cases and cause the sorting to fail, which will result in an
-        empty selection list.<br/>
-        In such a case the user will get notified about a parameter misconfiguration.
-    </div>
+        Be careful when using versioned sorting. This method is most effective with <a href="https://semver.org/">semver</a>
+        or Maven version-compliant ImageTags but may not perform optimally with other schemas!<br/>
+        The conversion of tags to versions may fail in specific cases, leading to sorting issues and potentially resulting in an empty selection list.
+        In such situations, users will receive a notification indicating a parameter misconfiguration.
+    </p>
 </div>

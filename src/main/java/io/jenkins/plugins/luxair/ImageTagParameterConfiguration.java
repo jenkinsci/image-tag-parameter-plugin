@@ -5,6 +5,7 @@ import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import hudson.Extension;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
+import io.jenkins.plugins.luxair.model.HtmlFormElement;
 import io.jenkins.plugins.luxair.model.Ordering;
 import io.jenkins.plugins.luxair.util.StringUtil;
 import jenkins.model.GlobalConfiguration;
@@ -29,6 +30,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
     private String defaultRegistry = DEFAULT_REGISTRY;
     private String defaultCredentialId = "";
     private Ordering defaultTagOrdering = Ordering.NATURAL;
+    private HtmlFormElement defaultFormElementTypeForTagPicker = HtmlFormElement.SELECT;
     private boolean defaultVerifySsl = true;
 
     public ImageTagParameterConfiguration() {
@@ -47,6 +49,10 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
         return defaultTagOrdering != null ? defaultTagOrdering : Ordering.NATURAL;
     }
 
+    public HtmlFormElement getDefaultFormElementTypeForTagPicker() {
+        return defaultFormElementTypeForTagPicker;
+    }
+
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) {
         if (json.has("defaultRegistry")) {
@@ -60,6 +66,10 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
         if (json.has("defaultTagOrdering")) {
             this.defaultTagOrdering = Ordering.valueOf(json.getString("defaultTagOrdering"));
             logger.fine("Changed default tag ordering to: " + defaultTagOrdering);
+        }
+        if (json.has("defaultFormElementTypeForTagPicker")) {
+            this.defaultFormElementTypeForTagPicker = HtmlFormElement.valueOf(json.getString("defaultFormElementTypeForTagPicker"));
+            logger.fine("Change default HTML Form Element Type for Tag Picker to: " + defaultFormElementTypeForTagPicker);
         }
         save();
         return true;
