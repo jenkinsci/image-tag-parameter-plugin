@@ -186,7 +186,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     }
 
     @Override
-    public ParameterValue createValue(StaplerRequest req, JSONObject jo) {
+    public ParameterValue createValue(StaplerRequest2 req, JSONObject jo) {
         return req.bindJSON(ImageTagParameterValue.class, jo);
     }
 
