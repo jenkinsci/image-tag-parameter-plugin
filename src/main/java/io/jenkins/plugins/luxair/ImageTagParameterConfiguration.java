@@ -5,6 +5,7 @@ import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import hudson.Extension;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
+import io.jenkins.plugins.luxair.model.TagPickerType;
 import io.jenkins.plugins.luxair.model.Ordering;
 import io.jenkins.plugins.luxair.util.StringUtil;
 import jenkins.model.GlobalConfiguration;
@@ -29,6 +30,7 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
     private String defaultRegistry = DEFAULT_REGISTRY;
     private String defaultCredentialId = "";
     private Ordering defaultTagOrdering = Ordering.NATURAL;
+    private TagPickerType defaultTagPickerType = TagPickerType.SELECT;
     private boolean defaultVerifySsl = true;
 
     public ImageTagParameterConfiguration() {
@@ -47,19 +49,27 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
         return defaultTagOrdering != null ? defaultTagOrdering : Ordering.NATURAL;
     }
 
+    public TagPickerType getDefaultTagPickerType() {
+        return defaultTagPickerType;
+    }
+
     @Override
     public boolean configure(StaplerRequest2 req, JSONObject json) {
         if (json.has("defaultRegistry")) {
-            this.defaultRegistry = json.getString("defaultRegistry");
+            this.defaultRegistry = StringUtil.removeTrailingSlash(json.getString("defaultRegistry"));
             logger.fine("Changed default registry to: " + defaultRegistry);
         }
         if (json.has("defaultCredentialId")) {
-            this.defaultRegistry = json.getString("defaultCredentialId");
+            this.defaultCredentialId = json.getString("defaultCredentialId");
             logger.fine("Changed default registry credentialsId to: " + defaultCredentialId);
         }
         if (json.has("defaultTagOrdering")) {
             this.defaultTagOrdering = Ordering.valueOf(json.getString("defaultTagOrdering"));
             logger.fine("Changed default tag ordering to: " + defaultTagOrdering);
+        }
+        if (json.has("defaultTagPickerType")) {
+            this.defaultTagPickerType = TagPickerType.valueOf(json.getString("defaultTagPickerType"));
+            logger.fine("Change default HTML Form Element Type for Tag Picker to: " + defaultTagPickerType);
         }
         save();
         return true;
@@ -87,6 +97,12 @@ public class ImageTagParameterConfiguration extends GlobalConfiguration {
         logger.info("Changing default tag ordering to: " + defaultTagOrdering);
         this.defaultTagOrdering = defaultTagOrdering;
         save();
+    }
+
+    @DataBoundSetter
+    @SuppressWarnings("unused")
+    public void setDefaultTagPickerType(TagPickerType defaultTagPickerType) {
+        this.defaultTagPickerType = defaultTagPickerType;
     }
 
     @SuppressWarnings("unused")
