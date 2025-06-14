@@ -26,6 +26,7 @@ import org.kohsuke.stapler.*;
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -43,7 +44,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     private String defaultTag;
     private Ordering tagOrder;
     private String errorMsg = "";
-    private boolean verifySsl = true;
+    private Boolean verifySsl = true;
 
     @DataBoundConstructor
     @SuppressWarnings("unused")
@@ -61,6 +62,13 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         this.defaultTag = StringUtil.isNotNullOrEmpty(defaultTag) ? defaultTag : "";
         this.credentialId = getDefaultOrEmptyCredentialId(this.registry, credentialId);
         this.tagOrder = tagOrder != null ? tagOrder : config.getDefaultTagOrdering();
+    }
+
+    private Object readResolve() {
+        if (Objects.isNull(verifySsl)) {
+            setVerifySsl(true);
+        }
+        return this;
     }
 
     public String getImage() {
@@ -112,7 +120,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
 	}
 
     @DataBoundSetter
-    @SuppressWarnings("unused")    
+    @SuppressWarnings("unused")
 	public void setVerifySsl(boolean verifySsl) {
 		this.verifySsl = verifySsl;
 	}
