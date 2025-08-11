@@ -19,7 +19,11 @@
     </f:entry>
 
     <f:entry title="${%Description}" field="description">
-        <f:textarea />
+        <f:textarea
+            codemirror-mode="${app.markupFormatter.codeMirrorMode}"
+            codemirror-config="${app.markupFormatter.codeMirrorConfig}"
+            previewEndpoint="/markupFormatter/previewDescription"
+        />
     </f:entry>
 
     <f:advanced>

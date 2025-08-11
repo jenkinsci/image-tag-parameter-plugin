@@ -1,5 +1,7 @@
 package io.jenkins.plugins.luxair;
 
+import com.cloudbees.plugins.credentials.CredentialsMatcher;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
@@ -8,6 +10,8 @@ import hudson.Extension;
 import hudson.model.Item;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
+import hudson.model.Queue;
+import hudson.model.queue.Tasks;
 import hudson.model.SimpleParameterDefinition;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
@@ -23,6 +27,7 @@ import org.kohsuke.stapler.*;
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -41,7 +46,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     private Ordering tagOrder;
     private TagPickerType tagPickerType;
     private String errorMsg = "";
-    private boolean verifySsl = true;
+    private Boolean verifySsl = true;
 
     @DataBoundConstructor
     @SuppressWarnings("unused")
@@ -60,6 +65,13 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         this.credentialId = getDefaultOrEmptyCredentialId(this.registry, credentialId);
         this.tagOrder = tagOrder != null ? tagOrder : config.getDefaultTagOrdering();
         this.tagPickerType = tagPickerType != null ? tagPickerType : config.getDefaultTagPickerType();
+    }
+
+    private Object readResolve() {
+        if (Objects.isNull(verifySsl)) {
+            setVerifySsl(true);
+        }
+        return this;
     }
 
     public String getImage() {
@@ -158,20 +170,18 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
 
     private StandardUsernamePasswordCredentials findCredential(String credentialId) {
         if (StringUtil.isNotNullOrEmpty(credentialId)) {
-            List<Item> items = Jenkins.get().getAllItems();
-            for (Item item : items) {
-                List<StandardUsernamePasswordCredentials> creds = CredentialsProvider.lookupCredentials(
-                    StandardUsernamePasswordCredentials.class,
-                    item,
-                    ACL.SYSTEM,
-                    Collections.emptyList());
-                for (StandardUsernamePasswordCredentials cred : creds) {
-                    if (cred.getId().equals(credentialId)) {
-                        return cred;
-                    }
-                }
+            Item context = null;
+
+            if (Stapler.getCurrentRequest() != null) {
+                context = Stapler.getCurrentRequest().findAncestorObject(Item.class);
             }
-            logger.warning("Cannot find credential for :" + credentialId + ":");
+            List<StandardUsernamePasswordCredentials> lookupCredentials = CredentialsProvider.lookupCredentials(
+                StandardUsernamePasswordCredentials.class,
+                context,
+                context instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task)context) : ACL.SYSTEM,
+                Collections.emptyList());
+            CredentialsMatcher allOf = CredentialsMatchers.allOf(CredentialsMatchers.withId(credentialId));
+            return CredentialsMatchers.firstOrNull(lookupCredentials, allOf);
         } else {
             logger.info("CredentialId is empty");
         }
@@ -195,7 +205,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
     }
 
     @Override
-    public ParameterValue createValue(StaplerRequest req, JSONObject jo) {
+    public ParameterValue createValue(StaplerRequest2 req, JSONObject jo) {
         return req.bindJSON(ImageTagParameterValue.class, jo);
     }
 
