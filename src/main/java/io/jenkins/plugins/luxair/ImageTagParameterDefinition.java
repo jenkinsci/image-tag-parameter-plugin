@@ -57,7 +57,8 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
 
     public ImageTagParameterDefinition(String name, String description, String image, String filter, String defaultTag,
                                        String registry, String credentialId, Ordering tagOrder) {
-        super(name, description);
+        super(name);
+        super.setDescription(description);
         this.image = image;
         this.registry = StringUtil.isNotNullOrEmpty(registry) ? registry : config.getDefaultRegistry();
         this.filter = StringUtil.isNotNullOrEmpty(filter) ? filter : ".*";
