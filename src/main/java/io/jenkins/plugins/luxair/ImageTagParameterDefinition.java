@@ -24,6 +24,7 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.*;
 
 import javax.annotation.Nonnull;
+import java.io.Serial;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +34,7 @@ import java.util.logging.Logger;
 
 public class ImageTagParameterDefinition extends SimpleParameterDefinition {
 
+    @Serial
     private static final long serialVersionUID = 3938123092372L;
     private static final Logger logger = Logger.getLogger(ImageTagParameterDefinition.class.getName());
     private static final ImageTagParameterConfiguration config = ImageTagParameterConfiguration.get();
@@ -64,6 +66,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
         this.tagOrder = tagOrder != null ? tagOrder : config.getDefaultTagOrdering();
     }
 
+    @Serial
     private Object readResolve() {
         if (Objects.isNull(verifySsl)) {
             setVerifySsl(true);
