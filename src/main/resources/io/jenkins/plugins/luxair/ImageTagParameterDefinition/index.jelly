@@ -1,16 +1,21 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core"
+         xmlns:st="jelly:stapler"
          xmlns:f="/lib/form">
 
+    <st:adjunct includes="io.jenkins.plugins.luxair.ImageTagParameterFilter.script"/>
     <j:set var="escapeEntryTitleAndDescription" value="false"/>
     <f:entry title="${h.escape(it.name)}" description="${it.formattedDescription}">
         <!-- this div is required because of ParametersDefinitionProperty.java#117 -->
-        <div name="parameter" description="${it.description}">
+        <div name="parameter" class="image-tag-parameter-container" description="${it.description}">
             <input type="hidden" name="name" value="${it.name}" />
             <input type="hidden" name="description" value="${it.description}" />
             <input type="hidden" name="imageName" value="${it.image}" />
+            <input type="search" name="filter" class="image-tag-parameter-filter jenkins-input"
+                   placeholder="Filter"
+                   style="vertical-align: top; margin-bottom: 1rem;"/>
 
-            <select name="imageTag" class="jenkins-input" style="min-width:18rem;">
+            <select name="imageTag" class="image-tag-parameter-select jenkins-input" style="min-width:18rem;">
                 <j:forEach var="aTag" items="${it.tags}" varStatus="loop">
                     <f:option value="${aTag}" selected="${aTag.equals(it.defaultTag)}">
                         ${it.image}:${aTag}

@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+    <script src="${it.packageUrl}/script.js" type="text/javascript" />
+</j:jelly>
