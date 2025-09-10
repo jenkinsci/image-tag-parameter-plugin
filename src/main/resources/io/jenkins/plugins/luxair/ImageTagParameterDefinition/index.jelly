@@ -10,13 +10,11 @@
             <input type="hidden" name="description" value="${it.description}" />
             <input type="hidden" name="imageName" value="${it.image}" />
 
-            <select name="imageTag" style="min-width:18rem;">
+            <select name="imageTag" class="jenkins-input" style="min-width:18rem;">
                 <j:forEach var="aTag" items="${it.tags}" varStatus="loop">
-                    <j:choose>
-                        <f:option value="${aTag}" selected="${aTag.equals(it.defaultTag)}">
-                            ${it.image}:${aTag}
-                        </f:option>
-                    </j:choose>
+                    <f:option value="${aTag}" selected="${aTag.equals(it.defaultTag)}">
+                        ${it.image}:${aTag}
+                    </f:option>
                 </j:forEach>
             </select>
 
