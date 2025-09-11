@@ -168,10 +168,10 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
             if (Stapler.getCurrentRequest() != null) {
                 context = Stapler.getCurrentRequest().findAncestorObject(Item.class);
             }
-            List<StandardUsernamePasswordCredentials> lookupCredentials = CredentialsProvider.lookupCredentials(
+            List<StandardUsernamePasswordCredentials> lookupCredentials = CredentialsProvider.lookupCredentialsInItem(
                 StandardUsernamePasswordCredentials.class,
                 context,
-                context instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task)context) : ACL.SYSTEM,
+                context instanceof Queue.Task ? Tasks.getAuthenticationOf2((Queue.Task)context) : ACL.SYSTEM2,
                 Collections.emptyList());
             CredentialsMatcher allOf = CredentialsMatchers.allOf(CredentialsMatchers.withId(credentialId));
             return CredentialsMatchers.firstOrNull(lookupCredentials, allOf);
@@ -237,7 +237,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
             }
             return new StandardListBoxModel()
                 .includeEmptyValue()
-                .includeAs(ACL.SYSTEM, context, StandardUsernameCredentials.class)
+                .includeAs(ACL.SYSTEM2, context, StandardUsernameCredentials.class)
                 .includeCurrentValue(credentialId);
         }
     }
