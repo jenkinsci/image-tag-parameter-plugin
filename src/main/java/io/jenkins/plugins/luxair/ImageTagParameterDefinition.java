@@ -163,11 +163,10 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
 
     private StandardUsernamePasswordCredentials findCredential(String credentialId) {
         if (StringUtil.isNotNullOrEmpty(credentialId)) {
-            Item context = null;
+            Item context = Optional.ofNullable(Stapler.getCurrentRequest2())
+                .map(request -> request.findAncestorObject(Item.class))
+                .orElse(null);
 
-            if (Stapler.getCurrentRequest() != null) {
-                context = Stapler.getCurrentRequest().findAncestorObject(Item.class);
-            }
             List<StandardUsernamePasswordCredentials> lookupCredentials = CredentialsProvider.lookupCredentialsInItem(
                 StandardUsernamePasswordCredentials.class,
                 context,
