@@ -182,8 +182,7 @@ public class ImageTagParameterDefinition extends SimpleParameterDefinition {
 
     @Override
     public ParameterDefinition copyWithDefaultValue(ParameterValue defaultValue) {
-        if (defaultValue instanceof ImageTagParameterValue) {
-            ImageTagParameterValue value = (ImageTagParameterValue) defaultValue;
+        if (defaultValue instanceof ImageTagParameterValue value) {
             return new ImageTagParameterDefinition(getName(), getDescription(),
                 getImage(), getFilter(), value.getImageTag(),
                 getRegistry(), getCredentialId(), getTagOrder());
